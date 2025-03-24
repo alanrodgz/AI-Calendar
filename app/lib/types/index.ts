@@ -1,12 +1,12 @@
 import { User } from 'firebase/auth';
 
-export type CalendarEvent = {
+export interface CalendarEvent {
   id: string;
   title: string;
-  date?: Date; // Make `date` optional
+  date: Date;
   color: string;
-  userId?: string; // Make `userId` optional
-};
+  userId: string;
+}
 
 // Export the User type from Firebase
 export type { User };

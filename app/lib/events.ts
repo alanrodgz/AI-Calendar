@@ -1,12 +1,17 @@
 import { db } from './firebase';
-import { collection, doc, setDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { CalendarEvent } from './types';
 
 export const addEvent = async (title: string, date: Date, color: string, userId: string) => {
   try {
+    // Create a new Date object with the date shifted forward by one day
+    const adjustedDate = new Date(date);
+    adjustedDate.setDate(adjustedDate.getDate() + 1); // Add one day to fix the offset
+    
+    // Store as Firestore Timestamp
     const newEvent: CalendarEvent = {
       title,
-      date,
+      date: Timestamp.fromDate(adjustedDate),
       color,
       userId,
       id: '', // You can generate an ID or let Firestore auto-generate it
@@ -29,11 +34,22 @@ export const getUserEvents = async (userId: string) => {
     const userEvents: { [key: string]: CalendarEvent[] } = {};
 
     querySnapshot.forEach((doc) => {
-      const eventData = doc.data() as CalendarEvent;
+      const eventData = doc.data() as {
+        title: string;
+        date: Timestamp;
+        color: string;
+        userId: string;
+        id: string;
+      };
 
-      // Provide a default date if missing
-      const eventDate = eventData.date || new Date(); // Default to today's date
-      const dateKey = `${eventDate.getFullYear()}-${eventDate.getMonth()}-${eventDate.getDate()}`;
+      // Convert Firestore Timestamp back to Date
+      let eventDate = eventData.date ? eventData.date.toDate() : new Date();
+      
+      // Create a date key using YYYY-MM-DD format
+      const year = eventDate.getFullYear();
+      const month = (eventDate.getMonth() + 1).toString().padStart(2, '0'); // Add 1 because months are 0-indexed
+      const day = eventDate.getDate().toString().padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
 
       if (!userEvents[dateKey]) {
         userEvents[dateKey] = [];
@@ -41,7 +57,7 @@ export const getUserEvents = async (userId: string) => {
 
       userEvents[dateKey].push({
         ...eventData,
-        date: eventDate, // Use the default date
+        date: eventDate,
         id: doc.id,
       });
     });
