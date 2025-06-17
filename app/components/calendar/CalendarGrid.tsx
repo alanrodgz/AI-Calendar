@@ -41,6 +41,7 @@ export default function CalendarGrid({ userId }: CalendarGridProps) {
 
   // Fetch events when the component mounts, when the user changes, or when the month changes
   useEffect(() => {
+    console.log("Fetching events for month:", currentMonth);
     if (user) {
       fetchEvents();
     }
@@ -49,9 +50,13 @@ export default function CalendarGrid({ userId }: CalendarGridProps) {
   // Function to fetch events from Firestore
   const fetchEvents = async () => {
     if (!user) return;
-
+  
     try {
-      const userEvents = await getUserEvents(user.uid);
+      // Extract the month (0-11) and year from your currentMonth Date object
+      const month = currentMonth.getMonth();
+      const year = currentMonth.getFullYear(); // Extract year from the date object
+      
+      const userEvents = await getUserEvents(user.uid, month, year);
       setEvents(userEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -107,10 +112,6 @@ export default function CalendarGrid({ userId }: CalendarGridProps) {
   };
 
   // Helper function to format date as a key - must match the format used in lib/events.js
-  // const formatDateKey = (date: Date) => {
-  //   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-  // };
-
   const formatDateKey = (date: Date) => {
     return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
   };

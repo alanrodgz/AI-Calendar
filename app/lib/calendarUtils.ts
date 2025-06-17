@@ -40,12 +40,13 @@ export const useCalendar = () => {
 
   // Navigate to the previous month
   const prevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    console.log("Previous month button clicked");
+    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
   };
 
-  // Navigate to the next month
   const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    console.log("Next month button clicked");
+    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
   };
 
   // Go to today's date
